@@ -530,11 +530,8 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   for (auto it = electrons->begin(); it != electrons->end(); it++) {
     if (it->pt() > el_min_pt) {
       selectedElectrons.emplace_back(*it);
-      value_el_pt[value_el_n] = it->pt();
-      value_el_eta[value_el_n] = it->eta();
-      value_el_phi[value_el_n] = it->phi();
-      value_el_charge[value_el_n] = it->charge();
-      value_el_mass[value_el_n] = it->mass();
+
+
       value_el_cutbasedid[value_el_n] = it->passingCutBasedPreselection();
       value_el_pfid[value_el_n] = it->passingPflowPreselection();
       //added for cut based id
@@ -561,62 +558,44 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
         value_el_pfreliso03all[value_el_n] = -999;
       }
       float pfIso = value_el_pfreliso03all[value_el_n];
-      auto trk = it->gsfTrack();
-      value_el_dxy[value_el_n] = trk->dxy(pv);
-      value_el_dz[value_el_n] = trk->dz(pv);
-      value_el_dxyErr[value_el_n] = trk->d0Error();
-      value_el_dzErr[value_el_n] = trk->dzError();
+
+
       value_el_jetidx[value_el_n] = -1;
       value_el_genpartidx[value_el_n] = -1;
-      if ( abs(it->eta()) <= 1.479 ) {
-	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.01 &&
-             it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-	  value_el_isTight[value_el_n] = true;
-	  value_el_isMedium[value_el_n] = false;
-	  value_el_isLoose[value_el_n] = false;
-	}
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 &&  pfIso<.15 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05  && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 &&  pfIso<.15 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
+      if ( abs(it->eta()) <= 1.479 ) {   
+	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && 
+	     it->sigmaIetaIeta()<.01 && it->hadronicOverEm()<.12 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+	     abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 ) {
+	  
           value_el_isLoose[value_el_n] = true;
+	  
+	  if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
+	    value_el_isMedium[value_el_n] = true;
+	    
+	    if (abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && pfIso<.10 ){
+	      value_el_isTight[value_el_n] = true;
+	    }
+	  }
 	}
       }
       else if ( abs(it->eta()) > 1.479 && abs(it->eta()) < 2.5 ) {
-        if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && it->sigmaIetaIeta()<.03 &&
-             it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = true;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 && pfIso<.15 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-        else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.1 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 && pfIso<.15 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
+        if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && 
+	     it->sigmaIetaIeta()<.03 && it->hadronicOverEm()<.1 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+	  
           value_el_isLoose[value_el_n] = true;
-        }
-	else {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
+	  
+	  if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
+	    value_el_isMedium[value_el_n] = true;
+	    
+	    if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && pfIso<.10 ){
+	      value_el_isTight[value_el_n] = true;
+	    }
+	  }
         }
       }
       value_el_n++;
@@ -918,26 +897,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_mu_jetidx[p - selectedMuons.begin()] = findBestMatch(selectedJets, p4);
     }
 
-    // Match electrons with gen particles and jets
-    for (auto p = selectedElectrons.begin(); p != selectedElectrons.end(); p++) {
-      // Gen particle matching
-      auto p4 = p->p4();
-      auto idx = findBestVisibleMatch(interestingGenParticles, p4);
-      if (idx != -1) {
-        auto g = interestingGenParticles.begin() + idx;
-        value_gen_pt[value_gen_n] = g->pt();
-        value_gen_eta[value_gen_n] = g->eta();
-        value_gen_phi[value_gen_n] = g->phi();
-        value_gen_mass[value_gen_n] = g->mass();
-        value_gen_pdgid[value_gen_n] = g->pdgId();
-        value_gen_status[value_gen_n] = g->status();
-        value_el_genpartidx[p - selectedElectrons.begin()] = value_gen_n;
-        value_gen_n++;
-      }
-
-      // Jet matching
-      value_el_jetidx[p - selectedElectrons.begin()] = findBestMatch(selectedJets, p4);
-    }
 
    // Match photons with gen particles and jets
     for (auto p = selectedPhotons.begin(); p != selectedPhotons.end(); p++) {
