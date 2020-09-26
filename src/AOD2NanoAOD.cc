@@ -165,16 +165,7 @@ private:
   // Electrons
   const static int max_el = 1000;
   UInt_t value_el_n;
-  float value_el_pt[max_el];
-  float value_el_eta[max_el];
-  float value_el_phi[max_el];
-  float value_el_mass[max_el];
-  int value_el_charge[max_el];
   float value_el_pfreliso03all[max_el];
-  float value_el_dxy[max_el];
-  float value_el_dxyErr[max_el];
-  float value_el_dz[max_el];
-  float value_el_dzErr[max_el];
   bool value_el_cutbasedid[max_el];
   bool value_el_pfid[max_el];
   int value_el_genpartidx[max_el];
@@ -214,12 +205,6 @@ private:
   bool value_tau_idisoloose[max_tau];
   bool value_tau_idisomedium[max_tau];
   bool value_tau_idisotight[max_tau];
-  bool value_tau_idantieleloose[max_tau];
-  bool value_tau_idantielemedium[max_tau];
-  bool value_tau_idantieletight[max_tau];
-  bool value_tau_idantimuloose[max_tau];
-  bool value_tau_idantimumedium[max_tau];
-  bool value_tau_idantimutight[max_tau];
 
   
   // Photons
@@ -320,16 +305,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
 
   // Electrons
   tree->Branch("nElectron", &value_el_n, "nElectron/i");
-  tree->Branch("Electron_pt", value_el_pt, "Electron_pt[nElectron]/F");
-  tree->Branch("Electron_eta", value_el_eta, "Electron_eta[nElectron]/F");
-  tree->Branch("Electron_phi", value_el_phi, "Electron_phi[nElectron]/F");
-  tree->Branch("Electron_mass", value_el_mass, "Electron_mass[nElectron]/F");
-  tree->Branch("Electron_charge", value_el_charge, "Electron_charge[nElectron]/I");
   tree->Branch("Electron_pfRelIso03_all", value_el_pfreliso03all, "Electron_pfRelIso03_all[nElectron]/F");
-  tree->Branch("Electron_dxy", value_el_dxy, "Electron_dxy[nElectron]/F");
-  tree->Branch("Electron_dxyErr", value_el_dxyErr, "Electron_dxyErr[nElectron]/F");
-  tree->Branch("Electron_dz", value_el_dz, "Electron_dz[nElectron]/F");
-  tree->Branch("Electron_dzErr", value_el_dzErr, "Electron_dzErr[nElectron]/F");
   tree->Branch("Electron_cutBasedId", value_el_cutbasedid, "Electron_cutBasedId[nElectron]/O");
   tree->Branch("Electron_pfId", value_el_pfid, "Electron_pfId[nElectron]/O");
   tree->Branch("Electron_jetIdx", value_el_jetidx, "Electron_jetIdx[nElectron]/I");
@@ -356,12 +332,6 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Tau_idIsoLoose", value_tau_idisoloose, "Tau_idIsoLoose[nTau]/O");
   tree->Branch("Tau_idIsoMedium", value_tau_idisomedium, "Tau_idIsoMedium[nTau]/O");
   tree->Branch("Tau_idIsoTight", value_tau_idisotight, "Tau_idIsoTight[nTau]/O");
-  tree->Branch("Tau_idAntiEleLoose", value_tau_idantieleloose, "Tau_idAntiEleLoose[nTau]/O");
-  tree->Branch("Tau_idAntiEleMedium", value_tau_idantielemedium, "Tau_idAntiEleMedium[nTau]/O");
-  tree->Branch("Tau_idAntiEleTight", value_tau_idantieletight, "Tau_idAntiEleTight[nTau]/O");
-  tree->Branch("Tau_idAntiMuLoose", value_tau_idantimuloose, "Tau_idAntiMuLoose[nTau]/O");
-  tree->Branch("Tau_idAntiMuMedium", value_tau_idantimumedium, "Tau_idAntiMuMedium[nTau]/O");
-  tree->Branch("Tau_idAntiMuTight", value_tau_idantimutight, "Tau_idAntiMuTight[nTau]/O");
 
   
   // Photons
@@ -567,7 +537,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 	     it->sigmaIetaIeta()<.01 && it->hadronicOverEm()<.12 && 
 	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
 	     missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
-	     abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 ) {
+	     abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 ){
 	  
           value_el_isLoose[value_el_n] = true;
 	  
@@ -610,9 +580,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   iEvent.getByLabel(InputTag("hpsPFTauProducer"), taus);
 
   Handle<PFTauDiscriminator> tausLooseIso, tausVLooseIso, tausMediumIso, tausTightIso,
-                             tausDecayMode, tausLooseEleRej, tausMediumEleRej,
-                             tausTightEleRej, tausLooseMuonRej, tausMediumMuonRej,
-                             tausTightMuonRej, tausRawIso;
+                             tausDecayMode, tausRawIso;
 
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
           tausDecayMode);
@@ -627,20 +595,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
           tausMediumIso);
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"),
           tausTightIso);
-
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByLooseElectronRejection"),
-          tausLooseEleRej);
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByMediumElectronRejection"),
-          tausMediumEleRej);
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightElectronRejection"),
-          tausTightEleRej);
-
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByLooseMuonRejection"),
-          tausLooseMuonRej);
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByMediumMuonRejection"),
-          tausMediumMuonRej);
-  iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByTightMuonRejection"),
-          tausTightMuonRej);
 
   const float tau_min_pt = 15;
   value_tau_n = 0;
@@ -662,12 +616,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_tau_idisoloose[value_tau_n] = tausLooseIso->operator[](idx).second;
       value_tau_idisomedium[value_tau_n] = tausMediumIso->operator[](idx).second;
       value_tau_idisotight[value_tau_n] = tausTightIso->operator[](idx).second;
-      value_tau_idantieleloose[value_tau_n] = tausLooseEleRej->operator[](idx).second;
-      value_tau_idantielemedium[value_tau_n] = tausMediumEleRej->operator[](idx).second;
-      value_tau_idantieletight[value_tau_n] = tausTightEleRej->operator[](idx).second;
-      value_tau_idantimuloose[value_tau_n] = tausLooseMuonRej->operator[](idx).second;
-      value_tau_idantimumedium[value_tau_n] = tausMediumMuonRej->operator[](idx).second;
-      value_tau_idantimutight[value_tau_n] = tausTightMuonRej->operator[](idx).second;
 
       value_tau_reliso_all[value_tau_n] = (it->isolationPFChargedHadrCandsPtSum() + it->isolationPFGammaCandsEtSum()) / it->pt();
       value_tau_jetidx[value_tau_n] = -1;
@@ -746,49 +694,36 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       double corrPFCHIso = max(it->chargedHadronIso() - rhoIso * CH_AEff, 0.);
       double corrPFNHIso = max(it->neutralHadronIso() - rhoIso * NH_AEff, 0.);
       double corrPFPhIso = max(it->photonIso() - rhoIso * Ph_AEff, 0.);
+      value_ph_isTight[value_ph_n] = false;
+      value_ph_isMedium[value_ph_n] = false;
+      value_ph_isLoose[value_ph_n] = false;
       if ( it->eta() <= 1.479 ){
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && corrPFCHIso<.7 && corrPFNHIso<(.4+.04*it->pt())
-	     && corrPFPhIso<(.5+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-	  value_ph_isLoose[value_el_n] = false;
-	}	    
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && corrPFCHIso<1.5 && corrPFNHIso<(1.0+.04*it->pt())
-		  && corrPFPhIso<(.7+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = false;
-	  value_ph_isMedium[value_el_n] = true;
-	  value_ph_isLoose[value_el_n] = false;
-	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.012 && corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*it->pt())
-                  && corrPFPhIso<(1.3+.005*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
+	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.012 && 
+	     corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*it->pt()) && 
+	     corrPFPhIso<(1.3+.005*it->pt()) && passelectronveto==true) {
+          value_ph_isLoose[value_ph_n] = true;
+
+	  if ( it->sigmaIetaIeta()<.011 && corrPFCHIso<1.5 && corrPFNHIso<(1.0+.04*it->pt()) && corrPFPhIso<(.7+.005*it->pt())){
+	    value_ph_isMedium[value_ph_n] = true;
+
+	    if ( corrPFCHIso<.7 && corrPFNHIso<(.4+.04*it->pt()) && corrPFPhIso<(.5+0.005*it->pt()) ){
+	      value_ph_isTight[value_ph_n] = true;
+	    }
+	  }
 	}
       }
       else if ( it->eta() > 1.479 && it->eta() < 2.5 ) {
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.031 && corrPFCHIso<.5 && corrPFNHIso<(1.5+.04*it->pt())
-             && corrPFPhIso<(1.0+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = false;
-        }
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.033 && corrPFCHIso<1.2 && corrPFNHIso<(1.5+.04*it->pt())
-                  && corrPFPhIso<(1.0+.005*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = true;
-          value_ph_isLoose[value_el_n] = false;
+	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.034 && corrPFCHIso<2.3 && corrPFNHIso<(2.9+.04*it->pt()) && passelectronveto==true ){
+          value_ph_isLoose[value_ph_n] = true;
+	  
+	  if ( it->sigmaIetaIeta()<.033 && corrPFCHIso<1.2 && corrPFNHIso<(1.5+.04*it->pt()) && corrPFPhIso<(1.0+.005*it->pt())) {
+	    value_ph_isMedium[value_ph_n] = true;
+
+	    if ( it->sigmaIetaIeta()<0.031 && corrPFCHIso<0.5){
+	      value_ph_isTight[value_ph_n] = true;
+	    }
+	  }
 	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.034 && corrPFCHIso<2.3 && corrPFNHIso<(2.9+.04*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
-	}
-      }
-      else {
-	value_ph_isTight[value_el_n] = false;
-	value_ph_isMedium[value_el_n] = false;
-	value_ph_isLoose[value_el_n] = false;
       }
       value_ph_n++;
     }
