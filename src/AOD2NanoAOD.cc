@@ -43,6 +43,7 @@
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETFwd.h"
 
+#include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 
@@ -528,10 +529,13 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
         value_el_pfreliso03all[value_el_n] = -999;
       }
       float pfIso = value_el_pfreliso03all[value_el_n];
-
+      auto trk = it->gsfTrack();
 
       value_el_jetidx[value_el_n] = -1;
       value_el_genpartidx[value_el_n] = -1;
+      value_el_isLoose[value_el_n] = false;
+      value_el_isMedium[value_el_n] = false;
+      value_el_isTight[value_el_n] = false;
       if ( abs(it->eta()) <= 1.479 ) {   
 	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && 
 	     it->sigmaIetaIeta()<.01 && it->hadronicOverEm()<.12 && 
