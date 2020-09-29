@@ -65,6 +65,11 @@
 #include "FWCore/ParameterSet/interface/Registry.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrectionUncertainty.h"
 
 const static std::vector<std::string> interestingTriggers = {
     "HLT_IsoMu24_eta2p1",
@@ -810,6 +815,8 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       jecUnc_->setJetEta( uncorrJet.eta() );
       jecUnc_->setJetPt( corr * uncorrJet.pt() );
       double corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
+      jecUnc_->setJetEta( uncorrJet.eta() );
+      jecUnc_->setJetPt( corr * uncorrJet.pt() );
       double corrDown = corr * ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
 
       value_jet_pt[value_jet_n] = it->pt();

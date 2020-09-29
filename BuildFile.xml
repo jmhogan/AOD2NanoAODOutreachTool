@@ -8,6 +8,7 @@
 <use name="DataFormats/MuonReco"/>
 <use name="RecoMuon/TrackingTools"/>
 <use name="RecoEgamma/EgammaTools"/>
+<use name="CondFormats/JetMETObjects"/>
 <flags EDM_PLUGIN="1"/>
 </buildfile>
 
