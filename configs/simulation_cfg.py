@@ -42,6 +42,10 @@ process.source.skipEvents = cms.untracked.uint32(0)
 # Register fileservice for output file
 process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD", 
         isData = cms.bool(False)
+        jecL1Name = cms.FileInPath('workspace/AOD2NanoAOD/Summer12_V7_MC/Summer12_V7_MC_L1FastJet_AK5PFchs.txt'),
+        jecL2Name = cms.FileInPath('workspace/AOD2NanoAOD/Summer12_V7_MC/Summer12_V7_MC_L2Relative_AK5PFchs.txt'),
+        jecL3Name = cms.FileInPath('workspace/AOD2NanoAOD/Summer12_V7_MC/Summer12_V7_MC_L3Absolute_AK5PFchs.txt'),
+        jecUncName = cms.FileInPath('workspace/AOD2NanoAOD/Summer12_V7_MC/Summer12_V7_MC_Uncertainty_AK5PFchs.txt'),
         )
 
 process.TFileService = cms.Service(
