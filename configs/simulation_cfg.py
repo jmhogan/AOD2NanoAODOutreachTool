@@ -28,6 +28,7 @@ process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 ##### ------- This is a test file
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring('root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'))
+        #fileNames = cms.untracked.vstring('root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_RD1_START53_V7N-v1/20000/003063B7-4CCF-E211-9FED-003048D46124.root'))
 
 # Set the maximum number of events to be processed (-1 processes all events)
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(200))
