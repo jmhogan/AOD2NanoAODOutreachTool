@@ -71,6 +71,8 @@
 #include "CondFormats/JetMETObjects/interface/SimpleJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/SimpleJetCorrectionUncertainty.h"
 
+#include "DataFormats/PatCandidates/interface/Jet.h"
+
 const static std::vector<std::string> interestingTriggers = {
     "HLT_IsoMu24_eta2p1",
     "HLT_IsoMu24",
@@ -131,6 +133,7 @@ private:
   virtual void endJob();
   bool providesGoodLumisection(const edm::Event &iEvent);
   bool isData;
+  bool doPat;
   std::vector<std::string> jecPayloadNames_;
   std::string              jecL1_;
   std::string              jecL2_;
@@ -243,6 +246,7 @@ private:
   bool value_ph_isTight[max_ph];
 
   // MET
+  float value_met_type1_pt;
   float value_met_pt;
   float value_met_phi;
   float value_met_sumet;
@@ -264,6 +268,18 @@ private:
   float value_corr_jet_ptUp[max_jet];
   float value_corr_jet_ptDown[max_jet];
 
+  UInt_t value_patjet_n;
+  float value_patjet_pt[max_jet];
+  float value_patjet_ptUp[max_jet];
+  float value_patjet_ptDown[max_jet];
+  float value_patjet_eta[max_jet];
+  float value_patjet_mass[max_jet];
+  int value_patjet_hflav[max_jet];
+  float value_patjet_btag[max_jet];
+  float value_uncorr_patjet_pt[max_jet];
+  float value_uncorr_patjet_eta[max_jet];
+  float value_uncorr_patjet_mass[max_jet];
+
   //Pileup
   int value_total_pu;
   int value_true_pu;
@@ -284,6 +300,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   edm::Service<TFileService> fs;
 
   isData = iConfig.getParameter<bool>("isData");
+  doPat = iConfig.getParameter<bool>("doPat");
   jecL1_ = iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath(); // JEC level payloads                     
   jecL2_ = iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath(); // JEC level payloads                     
   jecL3_ = iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath(); // JEC level payloads                     
@@ -389,6 +406,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Photon_isTight", value_ph_isTight, "Photon_isTight[nPhoton]/O");
 
   // MET
+  if(doPat) tree->Branch("MET_type1_pt", &value_met_type1_pt, "MET_type1_pt/F");
   tree->Branch("MET_pt", &value_met_pt, "MET_pt/F");
   tree->Branch("MET_phi", &value_met_phi, "MET_phi/F");
   tree->Branch("MET_sumet", &value_met_sumet, "MET_sumet/F");
@@ -408,7 +426,19 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("CorrJet_pt", value_corr_jet_pt, "CorrJet_pt[nJet]/F");
   tree->Branch("CorrJet_ptUp", value_corr_jet_ptUp, "CorrJet_ptUp[nJet]/F");
   tree->Branch("CorrJet_ptDown", value_corr_jet_ptDown, "CorrJet_ptDown[nJet]/F");
-
+  if(doPat){
+    tree->Branch("nPatJet", &value_patjet_n, "nPatJet/i");
+    tree->Branch("PatJet_pt", value_patjet_pt, "PatJet_pt[nPatJet]/F");
+    tree->Branch("PatJet_ptUp", value_patjet_ptUp, "PatJet_ptUp[nPatJet]/F");
+    tree->Branch("PatJet_ptDown", value_patjet_ptDown, "PatJet_ptDown[nPatJet]/F");
+    tree->Branch("PatJet_eta", value_patjet_eta, "PatJet_eta[nPatJet]/F");
+    tree->Branch("PatJet_mass", value_patjet_mass, "PatJet_mass[nPatJet]/F");
+    tree->Branch("PatJet_hflav", value_patjet_hflav, "PatJet_hflav[nPatJet]/F");
+    tree->Branch("PatJet_btag", value_patjet_btag, "PatJet_btag[nPatJet]/F");
+    tree->Branch("PatJet_uncorr_pt", value_uncorr_patjet_pt, "PatJet_uncorr_pt[nPatJet]/F");
+    tree->Branch("PatJet_uncorr_eta", value_uncorr_patjet_eta, "PatJet_uncorr_eta[nPatJet]/F");
+    tree->Branch("PatJet_uncorr_mass", value_uncorr_patjet_mass, "PatJet_uncorr_mass[nPatJet]/F");
+  }
 
   // Pileup
   if (!isData) {
@@ -830,6 +860,50 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
       value_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
       value_jet_n++;
+    }
+  }
+
+  if(doPat){
+
+    Handle<PFMETCollection> metT1;
+    iEvent.getByLabel(InputTag("pfType1CorrectedMet"), metT1);
+    value_met_type1_pt = metT1->begin()->pt();
+
+    Handle<std::vector<pat::Jet> > patjets;
+    iEvent.getByLabel(InputTag("selectedPatJetsAK5PFCorr"), patjets);
+    
+    value_patjet_n = 0;
+    for (auto it = patjets->begin(); it != patjets->end(); it++) {
+      if (it->pt() > jet_min_pt) {
+	
+	// Corrected values are now the default
+	value_patjet_pt[value_patjet_n] = it->pt();
+	value_patjet_eta[value_patjet_n] = it->eta();
+	value_patjet_mass[value_patjet_n] = it->mass();
+	
+	// but uncorrected values can be accessed. JetID should be computed from the uncorrected jet
+	pat::Jet uncorrJet = it->correctedJet(0);
+	value_uncorr_patjet_pt[value_patjet_n] = uncorrJet.pt();
+	value_uncorr_patjet_eta[value_patjet_n] = uncorrJet.eta();
+	value_uncorr_patjet_mass[value_patjet_n] = uncorrJet.mass();
+	
+	// uncertainties still use the JetCorrectionUncertainty object
+	jecUnc_->setJetEta( it->eta() );
+	jecUnc_->setJetPt( it->pt() );
+	double uncUp = (1 + fabs(jecUnc_->getUncertainty(1)));
+	jecUnc_->setJetEta( it->eta() );
+	jecUnc_->setJetPt( it->pt() );
+	double uncDown = ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
+	
+	value_patjet_ptUp[value_jet_n] = uncUp * it->pt();
+	value_patjet_ptDown[value_jet_n] = uncDown * it->pt();
+	
+	// b-tagging is built in. Can access the truth flavor needed for b-tag effs & scale factor application!
+	value_patjet_hflav[value_patjet_n] = it->hadronFlavour(); 
+	value_patjet_btag[value_patjet_n] = it->bDiscriminator( "pfCombinedInclusiveSecondaryVertexV2BJetTags"); 
+	
+	value_patjet_n++;
+      }
     }
   }
 
