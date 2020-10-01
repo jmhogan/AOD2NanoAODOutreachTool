@@ -15,41 +15,24 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.options = cms.untracked.PSet(wantSummary=cms.untracked.bool(True))
 
 # Set the maximum number of events to be processed (-1 processes all events)
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(200))
 
+##### ------ This set of file setup is for LOTS of files, not a short test ------
 # Define files of dataset
-files = FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_10000_file_index.txt")
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20000_file_index.txt"))
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20001_file_index.txt"))
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20002_file_index.txt"))
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_210000_file_index.txt"))
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_30000_file_index.txt"))
-files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_310000_file_index.txt"))
+#files = FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_10000_file_index.txt")
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20000_file_index.txt"))
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20001_file_index.txt"))
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_20002_file_index.txt"))
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_210000_file_index.txt"))
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_30000_file_index.txt"))
+#files.extend(FileUtils.loadListFromFile("data/CMS_Run2012B_DoubleMuParked_AOD_22Jan2013-v1_310000_file_index.txt"))
 
-process.source = cms.Source(
-    "PoolSource", fileNames=cms.untracked.vstring(*files))
+#process.source = cms.Source(
+#   "PoolSource", fileNames=cms.untracked.vstring(*files))
 
-# Set global tag
-# We don't have set the global tag for the educational samples. This simplifies running the code since we don't have to access the database.
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = "FT_R_53_V18::All"
-
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.load('RecoJets.Configuration.RecoPFJets_cff')
-process.ak5PFJets.doAreaFastjet = True
-
-process.ak5PFchsCorrectedJets = cms.EDProducer('CorrectedPFJetProducer',
-        src = cms.InputTag("ak5CaloJets"),
-        correctors  = cms.VInputTag('ak5PFCHSL1FastL2L3Corrector')
-        )
-
-process.ak5PFchsCorrectedJetsSmeared = cms.EDProducer('SmearedPFJetProducer',
-        src = cms.InputTag('ak5PFchsCorrectedJets'),
-        enabled = cms.bool(True),
-        rho = cms.InputTag("fixedGridRhoFastjetAll"),
-        algo = cms.string('AK5PFchs'),
-        algopt = cms.string('AK5PFchs_pt')
-        )
+##### ------- This is a test file
+process.source = cms.Source("PoolSource",
+        fileNames = cms.untracked.vstring('root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoubleMuParked/AOD/22Jan2013-v1/10000/1EC938EF-ABEC-E211-94E0-90E6BA442F24.root'))
 
 # Apply JSON file with lumi mask (needs to be done after the process.source definition)
 goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
@@ -62,7 +45,11 @@ process.source.lumisToProcess.extend(myLumis)
 process.source.skipEvents = cms.untracked.uint32(0)
 
 # Register fileservice for output file
-process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD", isData = cms.bool(True))
+process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD", 
+        isData = cms.bool(True),
+        doPat = cms.bool(False)
+        )
+
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("output.root"))
 
