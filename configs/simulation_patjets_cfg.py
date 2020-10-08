@@ -31,7 +31,6 @@ process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(200))
 ##### ------- This is a test file
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring('root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 
 # Set global tag
 process.load('Configuration.StandardSequences.Services_cff')
@@ -61,7 +60,7 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),
                  'AK5', 'PFCorr',
                  doJTA        = True,
                  doBTagging   = True,
-                 jetCorrLabel = ('AK5PF', cms.vstring(['L1FastJet','L2Relative','L3Absolute']))
+                 jetCorrLabel = ('AK5PF', cms.vstring(['L1FastJet','L2Relative','L3Absolute'])),
                  doType1MET   = True,
                  doL1Cleaning = True,
                  doL1Counters = False,
