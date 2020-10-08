@@ -170,7 +170,6 @@ private:
   float value_mu_pfreliso03all[max_mu];
   float value_mu_pfreliso04all[max_mu];
   bool value_mu_tightid[max_mu];
-  bool value_mu_softid[max_mu];
   float value_mu_dxy[max_mu];
   float value_mu_dxyErr[max_mu];
   float value_mu_dz[max_mu];
@@ -350,7 +349,6 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Muon_pfRelIso03_all", value_mu_pfreliso03all, "Muon_pfRelIso03_all[nMuon]/F");
   tree->Branch("Muon_pfRelIso04_all", value_mu_pfreliso04all, "Muon_pfRelIso04_all[nMuon]/F");
   tree->Branch("Muon_tightId", value_mu_tightid, "Muon_tightId[nMuon]/O");
-  tree->Branch("Muon_softId", value_mu_softid, "Muon_softId[nMuon]/O");
   tree->Branch("Muon_dxy", value_mu_dxy, "Muon_dxy[nMuon]/F");
   tree->Branch("Muon_dxyErr", value_mu_dxyErr, "Muon_dxyErr[nMuon]/F");
   tree->Branch("Muon_dz", value_mu_dz, "Muon_dz[nMuon]/F");
@@ -537,7 +535,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
         value_mu_pfreliso04all[value_mu_n] = -999;
       }
       value_mu_tightid[value_mu_n] = muon::isTightMuon(*it, *vertices->begin());
-      value_mu_softid[value_mu_n] = muon::isSoftMuon(*it, *vertices->begin());
       auto trk = it->globalTrack();
       if (trk.isNonnull()) {
         value_mu_dxy[value_mu_n] = trk->dxy(pv);
