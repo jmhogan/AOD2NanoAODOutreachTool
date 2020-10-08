@@ -839,12 +839,14 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       jec_->setNPV   ( vertices->size() );
       double corr = jec_->getCorrection();
 
+      double corrUp = 1.0;
+      double corrDown = 1.0;
       jecUnc_->setJetEta( uncorrJet.eta() );
       jecUnc_->setJetPt( corr * uncorrJet.pt() );
-      double corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
+      corrUp = corr * (1 + fabs(jecUnc_->getUncertainty(1)));
       jecUnc_->setJetEta( uncorrJet.eta() );
       jecUnc_->setJetPt( corr * uncorrJet.pt() );
-      double corrDown = corr * ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
+      corrDown = corr * ( 1 - fabs(jecUnc_->getUncertainty(-1)) );
 
       value_jet_pt[value_jet_n] = it->pt();
       value_jet_eta[value_jet_n] = it->eta();
