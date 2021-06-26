@@ -898,8 +898,8 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 	value_patjet_ptDown[value_jet_n] = uncDown * it->pt();
 	
 	// b-tagging is built in. Can access the truth flavor needed for b-tag effs & scale factor application!
-	value_patjet_hflav[value_patjet_n] = it->hadronFlavour(); 
-	value_patjet_btag[value_patjet_n] = it->bDiscriminator( "pfCombinedInclusiveSecondaryVertexV2BJetTags"); 
+	value_patjet_hflav[value_patjet_n] = it->hadronFlavour(); // not working!
+	value_patjet_btag[value_patjet_n] = it->bDiscriminator( "combinedSecondaryVertexBJetTags"); 
 	
 	value_patjet_n++;
       }
